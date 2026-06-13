@@ -1,0 +1,29 @@
+port: 7880
+bind_addresses:
+  - "0.0.0.0"
+
+api_key: devkey
+api_secret: secret
+
+room:
+  max_participants: 100
+  empty_timeout: 300
+  max_metadata_bytes: 2048
+
+logging:
+  level: debug
+  sample: false
+
+audio:
+  enable_dtx: true
+  active_speakers:
+    samples_required: 10
+
+video:
+  dynacast: true
+
+webhook:
+  api_key: webhook-key
+  url: http://backend:3000/webhook
+
+development: true

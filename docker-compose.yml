@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: atomassist
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/database.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Supabase (using containers)
+  supabase:
+    image: supabase/supabase:latest
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: atomassist
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      JWT_SECRET: super-secret-jwt-token-change-me
+      ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNTk4OTIwMCwiZXhwIjoxOTMxNTY1MjAwfQ.abc123
+      SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjE1OTg5MjAwLCJleHAiOjE5MzE1NjUyMDB9.abc123
+    ports:
+      - "54321:5432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # LiveKit Server
+  livekit:
+    image: livekit/livekit-server:latest
+    command: --dev --config /etc/livekit.yaml
+    ports:
+      - "7880:7880"
+      - "7882:7882"
+    environment:
+      LIVEKIT_API_KEY: devkey
+      LIVEKIT_API_SECRET: secret
+    volumes:
+      - ./livekit.yaml:/etc/livekit.yaml
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      SUPABASE_URL: http://supabase:5432
+      SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYxNTk4OTIwMCwiZXhwIjoxOTMxNTY1MjAwfQ.abc123
+      SUPABASE_SERVICE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4YW1wbGUiLCJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjE1OTg5MjAwLCJleHAiOjE5MzE1NjUyMDB9.abc123
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      LIVEKIT_URL: ws://livekit:7880
+      LIVEKIT_API_KEY: devkey
+      LIVEKIT_API_SECRET: secret
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+      - livekit
+    volumes:
+      - ./backend/src:/app/src
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      VITE_API_URL: http://localhost:3000/api
+      VITE_SOCKET_URL: http://localhost:3000
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

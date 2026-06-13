@@ -1,0 +1,10 @@
+.env.local
+.env.production.local
+node_modules/
+dist/
+build/
+.DS_Store
+*.log
+.vscode/settings.json
+.idea/
+*.iml
