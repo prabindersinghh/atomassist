@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import {
   LiveKitRoom,
@@ -13,7 +14,14 @@ import { Message } from '../types/index.js';
 
 export const SessionRoom: React.FC = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const location = useLocation();
   const { user } = useAuthStore();
+  const navigationState = location.state as {
+    inviteToken?: string;
+    liveKitToken?: string;
+    liveKitUrl?: string;
+  } | null;
+  const inviteToken = navigationState?.inviteToken;
   const { messages, addMessage, setMessages } = useSessionStore();
   const [chatMessage, setChatMessage] = useState('');
   const [liveKitToken, setLiveKitToken] = useState('');
@@ -28,7 +36,22 @@ export const SessionRoom: React.FC = () => {
 
       try {
         const sessionResponse = await sessionAPI.getSession(sessionId);
-        const { liveKitToken: lt, liveKitUrl: lu } = sessionResponse.data;
+        let lt = navigationState?.liveKitToken;
+        let lu = navigationState?.liveKitUrl;
+
+        if (!lt || !lu) {
+          if (user?.role !== 'agent') {
+            throw new Error('Customer sessions must be joined through an invite token.');
+          }
+
+          const startResponse = await sessionAPI.startSession(sessionId);
+          lt = startResponse.data.liveKitToken;
+          lu = startResponse.data.liveKitUrl;
+        }
+
+        if (!lt || !lu) {
+          throw new Error('LiveKit credentials were not returned for this session.');
+        }
 
         setLiveKitToken(lt);
         setLiveKitUrl(lu);
@@ -55,7 +78,7 @@ export const SessionRoom: React.FC = () => {
     };
 
     loadSession();
-  }, [sessionId, setMessages, addMessage]);
+  }, [sessionId, setMessages, addMessage, navigationState, user?.role]);
 
   const handleSendMessage = async () => {
     if (!chatMessage.trim() || !sessionId) return;
@@ -88,6 +111,18 @@ export const SessionRoom: React.FC = () => {
       className="min-h-screen bg-[#111827]"
     >
       <div className="w-full h-screen flex flex-col bg-[#111827]">
+        {inviteToken && (
+          <div className="bg-[#1a1f2e] border-b border-gray-700 px-4 py-3 text-white flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+            <div>
+              <p className="text-sm text-gray-400">Customer invite token</p>
+              <p className="font-mono text-[#FFC107] break-all">{inviteToken}</p>
+            </div>
+            <p className="text-sm text-gray-300 break-all">
+              Join URL: {`${window.location.origin}/join?code=${inviteToken}`}
+            </p>
+          </div>
+        )}
+
         <div className="flex-1">
           <VideoConference />
         </div>

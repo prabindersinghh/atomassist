@@ -7,6 +7,8 @@ import { Login } from './pages/Login.js';
 import { Signup } from './pages/Signup.js';
 import { AgentDashboard } from './pages/AgentDashboard.js';
 import { SessionRoom } from './pages/SessionRoom.js';
+import { AdminDashboard } from './pages/AdminDashboard.js';
+import { JoinSession } from './pages/JoinSession.js';
 import './index.css';
 
 const queryClient = new QueryClient();
@@ -25,6 +27,7 @@ const App: React.FC = () => {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/join" element={<JoinSession />} />
 
           {/* Protected routes */}
           <Route
@@ -41,6 +44,15 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <SessionRoom />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute requiredRoles={['admin']}>
+                <AdminDashboard />
               </ProtectedRoute>
             }
           />

@@ -17,7 +17,7 @@ router.post('/', requireRole('agent'), async (req: Request, res: Response) => {
     res.status(201).json({
       session,
       inviteToken,
-      inviteUrl: `${process.env.FRONTEND_URL}/join?code=${inviteToken}`,
+      inviteUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/join?code=${inviteToken}`,
     });
   } catch (error) {
     console.error(error);
@@ -90,8 +90,8 @@ router.post('/join/:inviteToken', async (req: Request, res: Response) => {
     // Add participant
     const participant = await sessionService.addParticipant(sessionId, req.user!.sub, 'customer');
 
-    // Generate LiveKit token
-    const liveKitToken = generateLiveKitToken(
+    // Generate LiveKit token (async in v2.x)
+    const liveKitToken = await generateLiveKitToken(
       sessionId,
       req.user!.email,
       req.user!.sub
@@ -137,8 +137,8 @@ router.post('/:sessionId/start', requireRole('agent'), async (req: Request, res:
 
     const updated = await sessionService.updateSessionStatus(req.params.sessionId, 'active');
 
-    // Generate LiveKit token for agent
-    const liveKitToken = generateLiveKitToken(
+    // Generate LiveKit token for agent (async in v2.x)
+    const liveKitToken = await generateLiveKitToken(
       session.id,
       req.user!.email,
       req.user!.sub

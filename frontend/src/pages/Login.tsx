@@ -20,7 +20,13 @@ export const Login: React.FC = () => {
       const response = await authAPI.login(email, password);
       const { user, token, refreshToken } = response.data;
       login(user, token, refreshToken);
-      navigate(user.role === 'agent' ? '/agent/dashboard' : '/sessions');
+      if (user.role === 'admin') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'agent') {
+        navigate('/agent/dashboard');
+      } else {
+        navigate('/join');
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Login failed');
     } finally {

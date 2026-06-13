@@ -8,7 +8,7 @@ export const AdminDashboard: React.FC = () => {
 
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
     queryKey: ['admin-sessions'],
-    queryFn: () => apiClient.get('/admin/sessions').then((res) => res.data),
+    queryFn: () => apiClient.get('/admin/sessions').then((res) => res.data.sessions || res.data),
     refetchInterval: 5000,
   });
 
@@ -38,6 +38,14 @@ export const AdminDashboard: React.FC = () => {
     { name: 'Total Sessions', value: metrics?.totalSessions || 0 },
     { name: 'Recordings', value: metrics?.recordingCount || 0 },
   ];
+
+  const handleEndSession = async (sessionId: string) => {
+    try {
+      await apiClient.post(`/admin/sessions/${sessionId}/end`);
+    } catch (error) {
+      console.error('Failed to end session:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0B0F19] to-[#111827] text-white p-8">
@@ -148,7 +156,10 @@ export const AdminDashboard: React.FC = () => {
                         m
                       </td>
                       <td className="py-3 px-4">
-                        <button className="px-3 py-1 bg-red-900/20 text-red-400 rounded text-xs hover:bg-red-900/40">
+                        <button
+                          onClick={() => handleEndSession(session.id)}
+                          className="px-3 py-1 bg-red-900/20 text-red-400 rounded text-xs hover:bg-red-900/40"
+                        >
                           End
                         </button>
                       </td>

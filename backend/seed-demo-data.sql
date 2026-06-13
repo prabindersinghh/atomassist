@@ -1,11 +1,13 @@
--- ATOMASSIST DEMO SEED DATA
--- This script creates demo users, sessions, and data for recording demo videos
--- Run this AFTER running database.sql
+-- AtomAssist demo seed data
+-- Run after backend/database.sql.
+-- Demo passwords:
+--   agent@atomberg.com    / agent123
+--   customer@atomberg.com / customer123
+--   admin@atomberg.com    / admin123
 
--- Clear existing data (optional - comment out if you want to keep existing data)
-DELETE FROM audit_logs;
 DELETE FROM analytics_events;
 DELETE FROM system_metrics;
+DELETE FROM audit_logs;
 DELETE FROM session_tags;
 DELETE FROM session_notes;
 DELETE FROM recordings;
@@ -16,160 +18,139 @@ DELETE FROM invite_tokens;
 DELETE FROM sessions;
 DELETE FROM users;
 
--- Reset auto-increment sequences
-ALTER SEQUENCE users_id_seq RESTART WITH 1;
-ALTER SEQUENCE sessions_id_seq RESTART WITH 1;
-ALTER SEQUENCE participants_id_seq RESTART WITH 1;
-ALTER SEQUENCE messages_id_seq RESTART WITH 1;
-ALTER SEQUENCE files_id_seq RESTART WITH 1;
-ALTER SEQUENCE recordings_id_seq RESTART WITH 1;
-ALTER SEQUENCE session_notes_id_seq RESTART WITH 1;
-ALTER SEQUENCE audit_logs_id_seq RESTART WITH 1;
-ALTER SEQUENCE analytics_events_id_seq RESTART WITH 1;
+INSERT INTO users (id, email, password_hash, name, role, avatar_url, created_at, updated_at)
+VALUES
+  (
+    '11111111-1111-1111-1111-111111111111',
+    'agent@atomberg.com',
+    '$2b$10$vLWSHc/747r/9foAhLyLfeMld67dGb2gYSK20S8Bu2Oc7xWZA99Ny',
+    'Aarav Mehta',
+    'agent',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Aarav',
+    NOW(),
+    NOW()
+  ),
+  (
+    '22222222-2222-2222-2222-222222222222',
+    'customer@atomberg.com',
+    '$2b$10$d5i9ZZNPSqT6yi5o2ws4Eef/cMpyLJxZwGO4JGU9VljVjOyLu/iQi',
+    'Priya Shah',
+    'customer',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Priya',
+    NOW(),
+    NOW()
+  ),
+  (
+    '33333333-3333-3333-3333-333333333333',
+    'admin@atomberg.com',
+    '$2b$10$3Se.jCevflS0LwLhXMK/9uvwLY65MBLSBwHAK534kCdv6q64.r3Ou',
+    'Ops Admin',
+    'admin',
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin',
+    NOW(),
+    NOW()
+  );
 
--- Insert Demo Users
-INSERT INTO users (name, email, role, password_hash, avatar_url, created_at, updated_at) VALUES
--- Agents
-('Alex Johnson', 'alex@atomberg.com', 'agent', '$2b$10$salt.hash.here.for.demo1', 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex', NOW(), NOW()),
-('Sarah Chen', 'sarah@atomberg.com', 'agent', '$2b$10$salt.hash.here.for.demo2', 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah', NOW(), NOW()),
-('Mike Wilson', 'mike@atomberg.com', 'agent', '$2b$10$salt.hash.here.for.demo3', 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike', NOW(), NOW()),
+INSERT INTO sessions (id, agent_id, start_time, end_time, status, summary, ai_summary, created_at, updated_at)
+VALUES
+  (
+    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    '11111111-1111-1111-1111-111111111111',
+    NOW() - INTERVAL '2 days',
+    NOW() - INTERVAL '2 days' + INTERVAL '28 minutes',
+    'ended',
+    'Customer fan installation was verified over video. Agent identified incorrect regulator wiring and guided the customer through safe next steps.',
+    '{"issue_summary":"Fan was not responding after installation","root_cause":"Regulator wiring mismatch","actions_taken":"Verified wiring visually, checked power state, shared installation checklist","resolution":"Customer confirmed fan was operational","next_steps":"Schedule electrician review if issue returns"}',
+    NOW() - INTERVAL '2 days',
+    NOW() - INTERVAL '2 days' + INTERVAL '28 minutes'
+  ),
+  (
+    'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+    '11111111-1111-1111-1111-111111111111',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '1 day' + INTERVAL '18 minutes',
+    'ended',
+    'Warranty claim walkthrough completed with invoice screenshot shared in chat.',
+    '{"issue_summary":"Customer needed warranty claim help","root_cause":"Missing serial number location","actions_taken":"Used video to locate label and file sharing for invoice","resolution":"Warranty form submitted","next_steps":"Customer will receive claim update by email"}',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '1 day' + INTERVAL '18 minutes'
+  ),
+  (
+    'cccccccc-cccc-cccc-cccc-cccccccccccc',
+    '11111111-1111-1111-1111-111111111111',
+    NOW() - INTERVAL '12 minutes',
+    NULL,
+    'active',
+    NULL,
+    NULL,
+    NOW() - INTERVAL '12 minutes',
+    NOW()
+  );
 
--- Customers
-('John Doe', 'john@customer.com', 'customer', '$2b$10$salt.hash.here.for.demo4', 'https://api.dicebear.com/7.x/avataaars/svg?seed=John', NOW(), NOW()),
-('Emma Davis', 'emma@customer.com', 'customer', '$2b$10$salt.hash.here.for.demo5', 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emma', NOW(), NOW()),
-('Robert Brown', 'robert@customer.com', 'customer', '$2b$10$salt.hash.here.for.demo6', 'https://api.dicebear.com/7.x/avataaars/svg?seed=Robert', NOW(), NOW()),
+INSERT INTO participants (session_id, user_id, role, joined_at, left_at, connection_quality, device_info)
+VALUES
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'agent', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '28 minutes', 'good', '{"browser":"Chrome","os":"Windows","camera":"HD Webcam","microphone":"Default"}'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '22222222-2222-2222-2222-222222222222', 'customer', NOW() - INTERVAL '2 days' + INTERVAL '1 minute', NOW() - INTERVAL '2 days' + INTERVAL '28 minutes', 'good', '{"browser":"Chrome Mobile","os":"Android","camera":"Phone Camera","microphone":"Phone Mic"}'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'agent', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '18 minutes', 'good', '{"browser":"Edge","os":"Windows","camera":"HD Webcam","microphone":"Default"}'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222', 'customer', NOW() - INTERVAL '1 day' + INTERVAL '2 minutes', NOW() - INTERVAL '1 day' + INTERVAL '18 minutes', 'fair', '{"browser":"Safari","os":"iOS","camera":"Phone Camera","microphone":"Phone Mic"}'),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '11111111-1111-1111-1111-111111111111', 'agent', NOW() - INTERVAL '12 minutes', NULL, 'good', '{"browser":"Chrome","os":"Windows","camera":"HD Webcam","microphone":"Default"}');
 
--- Admin
-('Admin User', 'admin@atomberg.com', 'admin', '$2b$10$salt.hash.here.for.demo7', 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin', NOW(), NOW());
+INSERT INTO messages (session_id, user_id, content, type, read_by, created_at)
+VALUES
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '22222222-2222-2222-2222-222222222222', 'The fan turns on but speed control is not working.', 'text', ARRAY['22222222-2222-2222-2222-222222222222']::uuid[], NOW() - INTERVAL '2 days' + INTERVAL '2 minutes'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Please show me the regulator wiring and the model label.', 'text', ARRAY['11111111-1111-1111-1111-111111111111']::uuid[], NOW() - INTERVAL '2 days' + INTERVAL '3 minutes'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'I found the mismatch. I am sharing the installation checklist here.', 'text', ARRAY['11111111-1111-1111-1111-111111111111']::uuid[], NOW() - INTERVAL '2 days' + INTERVAL '8 minutes'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222', 'I cannot find the serial number for warranty registration.', 'text', ARRAY['22222222-2222-2222-2222-222222222222']::uuid[], NOW() - INTERVAL '1 day' + INTERVAL '2 minutes'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'Tilt the camera toward the bottom label. The serial number is below the QR code.', 'text', ARRAY['11111111-1111-1111-1111-111111111111']::uuid[], NOW() - INTERVAL '1 day' + INTERVAL '4 minutes'),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', '11111111-1111-1111-1111-111111111111', 'Live demo session is ready. Share the invite token with the customer browser.', 'text', ARRAY['11111111-1111-1111-1111-111111111111']::uuid[], NOW() - INTERVAL '10 minutes');
 
--- Insert Demo Sessions
-INSERT INTO sessions (agent_id, customer_id, title, description, status, start_time, end_time, duration_seconds, created_at, updated_at) VALUES
--- Completed Sessions
-(1, 4, 'Installation Issue - AC Unit', 'Customer reported AC not turning on. Resolved by resetting circuit breaker.', 'completed', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '45 minutes', 2700, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
-(2, 5, 'Warranty Claim Help', 'Customer filing warranty claim for defective fan. Guided through process.', 'completed', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '30 minutes', 1800, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),
-(1, 6, 'Remote Troubleshooting', 'Heater thermostat not responding. Fixed via remote configuration.', 'completed', NOW() - INTERVAL '12 hours', NOW() - INTERVAL '12 hours' + INTERVAL '20 minutes', 1200, NOW() - INTERVAL '12 hours', NOW() - INTERVAL '12 hours'),
+INSERT INTO files (session_id, user_id, filename, size, type, url, preview_url, created_at)
+VALUES
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Atomberg-Fan-Installation-Checklist.pdf', 524288, 'application/pdf', 'https://example.com/demo/fan-installation-checklist.pdf', NULL, NOW() - INTERVAL '2 days' + INTERVAL '8 minutes'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '22222222-2222-2222-2222-222222222222', 'Invoice-Screenshot.png', 384000, 'image/png', 'https://example.com/demo/invoice-screenshot.png', 'https://example.com/demo/invoice-screenshot.png', NOW() - INTERVAL '1 day' + INTERVAL '5 minutes');
 
--- Active Session
-(2, 4, 'Filter Replacement Guide', 'Customer learning how to replace air filter', 'active', NOW() - INTERVAL '15 minutes', NULL, NULL, NOW() - INTERVAL '15 minutes', NOW());
+INSERT INTO recordings (session_id, status, duration, size, url, started_at, completed_at)
+VALUES
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'ready', 1680, 42000000, 'https://example.com/demo/recordings/installation-support.mp4', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '31 minutes'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ready', 1080, 30000000, 'https://example.com/demo/recordings/warranty-walkthrough.mp4', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '21 minutes');
 
--- Insert Participants
-INSERT INTO participants (session_id, user_id, joined_at, left_at, duration_seconds, connection_quality) VALUES
--- Session 1
-(1, 1, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '45 minutes', 2700, 'excellent'),
-(1, 4, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '45 minutes', 2700, 'good'),
+INSERT INTO session_notes (session_id, created_by, content, is_private, created_at, updated_at)
+VALUES
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '11111111-1111-1111-1111-111111111111', 'Visual verification avoided a field visit. Customer understood the safety boundary and next steps.', true, NOW() - INTERVAL '2 days' + INTERVAL '29 minutes', NOW() - INTERVAL '2 days' + INTERVAL '29 minutes'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'Warranty flow completed. Customer shared invoice through chat.', true, NOW() - INTERVAL '1 day' + INTERVAL '19 minutes', NOW() - INTERVAL '1 day' + INTERVAL '19 minutes');
 
--- Session 2
-(2, 2, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '30 minutes', 1800, 'good'),
-(2, 5, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '30 minutes', 1800, 'excellent'),
+INSERT INTO session_tags (session_id, tag, created_at)
+VALUES
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'installation', NOW() - INTERVAL '2 days'),
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'troubleshooting', NOW() - INTERVAL '2 days'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'warranty', NOW() - INTERVAL '1 day'),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'repair', NOW() - INTERVAL '12 minutes');
 
--- Session 3
-(3, 1, NOW() - INTERVAL '12 hours', NOW() - INTERVAL '12 hours' + INTERVAL '20 minutes', 1200, 'excellent'),
-(3, 6, NOW() - INTERVAL '12 hours', NOW() - INTERVAL '12 hours' + INTERVAL '20 minutes', 1200, 'good'),
+INSERT INTO invite_tokens (token, session_id, expires_at, created_at)
+VALUES
+  ('DEMO-CUSTOMER-JOIN', 'cccccccc-cccc-cccc-cccc-cccccccccccc', NOW() + INTERVAL '24 hours', NOW());
 
--- Session 4 (Active)
-(4, 2, NOW() - INTERVAL '15 minutes', NULL, NULL, 'excellent'),
-(4, 4, NOW() - INTERVAL '15 minutes', NULL, NULL, 'excellent');
+INSERT INTO audit_logs (action, actor_id, resource_type, resource_id, changes, created_at)
+VALUES
+  ('SESSION_CREATED', '11111111-1111-1111-1111-111111111111', 'SESSION', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '{"source":"demo_seed"}', NOW() - INTERVAL '2 days'),
+  ('SESSION_ENDED', '11111111-1111-1111-1111-111111111111', 'SESSION', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '{"durationSeconds":1680}', NOW() - INTERVAL '2 days' + INTERVAL '28 minutes'),
+  ('FILE_SHARED', '22222222-2222-2222-2222-222222222222', 'SESSION', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '{"filename":"Invoice-Screenshot.png"}', NOW() - INTERVAL '1 day' + INTERVAL '5 minutes'),
+  ('ADMIN_DASHBOARD_VIEWED', '33333333-3333-3333-3333-333333333333', 'ADMIN', 'dashboard', '{"source":"demo_seed"}', NOW() - INTERVAL '1 hour');
 
--- Insert Messages (Chat History)
-INSERT INTO messages (session_id, user_id, content, message_type, created_at) VALUES
--- Session 1 Messages
-(1, 4, 'Hi, my AC unit stopped working', 'text', NOW() - INTERVAL '2 days'),
-(1, 1, 'I can help you with that. Let me first check your model number.', 'text', NOW() - INTERVAL '2 days' + INTERVAL '30 seconds'),
-(1, 1, 'Can you tell me when it last worked properly?', 'text', NOW() - INTERVAL '2 days' + INTERVAL '1 minute'),
-(1, 4, 'It was working fine yesterday, stopped this morning', 'text', NOW() - INTERVAL '2 days' + INTERVAL '2 minutes'),
-(1, 1, 'Let me share my screen to show you where the reset button is', 'text', NOW() - INTERVAL '2 days' + INTERVAL '3 minutes'),
-(1, 4, 'Found it! The issue is resolved now, thanks!', 'text', NOW() - INTERVAL '2 days' + INTERVAL '40 minutes'),
+INSERT INTO analytics_events (event_name, user_id, session_id, event_data, timestamp)
+VALUES
+  ('call_started', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '{"participants":2,"mediaServer":"LiveKit","network":"good"}', NOW() - INTERVAL '2 days'),
+  ('call_ended', '11111111-1111-1111-1111-111111111111', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', '{"resolution":"solved","durationSeconds":1680}', NOW() - INTERVAL '2 days' + INTERVAL '28 minutes'),
+  ('file_shared', '22222222-2222-2222-2222-222222222222', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '{"type":"image/png"}', NOW() - INTERVAL '1 day' + INTERVAL '5 minutes'),
+  ('active_demo_session_ready', '11111111-1111-1111-1111-111111111111', 'cccccccc-cccc-cccc-cccc-cccccccccccc', '{"inviteToken":"DEMO-CUSTOMER-JOIN"}', NOW() - INTERVAL '12 minutes');
 
--- Session 2 Messages
-(2, 5, 'Hi, I need to file a warranty claim', 'text', NOW() - INTERVAL '1 day'),
-(2, 2, 'Of course! I can walk you through the process. Do you have your receipt?', 'text', NOW() - INTERVAL '1 day' + INTERVAL '1 minute'),
-(2, 5, 'Yes, I have the email receipt', 'text', NOW() - INTERVAL '1 day' + INTERVAL '2 minutes'),
-(2, 2, 'Perfect! Let me send you the warranty claim form', 'text', NOW() - INTERVAL '1 day' + INTERVAL '3 minutes'),
-(2, 2, 'You can see it on your screen now', 'text', NOW() - INTERVAL '1 day' + INTERVAL '4 minutes'),
-(2, 5, 'Great, filling it out now', 'text', NOW() - INTERVAL '1 day' + INTERVAL '10 minutes'),
+INSERT INTO system_metrics (metric_name, value, timestamp)
+VALUES
+  ('active_sessions', 1, NOW()),
+  ('connected_participants', 1, NOW()),
+  ('ready_recordings', 2, NOW()),
+  ('average_session_duration_seconds', 1380, NOW());
 
--- Session 3 Messages
-(3, 6, 'My thermostat is not responding', 'text', NOW() - INTERVAL '12 hours'),
-(3, 1, 'No problem, I can help remotely. Let me connect to your device', 'text', NOW() - INTERVAL '12 hours' + INTERVAL '1 minute'),
-(3, 1, 'I see the issue - it needs a firmware update', 'text', NOW() - INTERVAL '12 hours' + INTERVAL '3 minutes'),
-(3, 1, 'Initiating update now...', 'text', NOW() - INTERVAL '12 hours' + INTERVAL '4 minutes'),
-(3, 6, 'That was quick! Working now, thanks so much', 'text', NOW() - INTERVAL '12 hours' + INTERVAL '15 minutes'),
-
--- Session 4 Messages (Active)
-(4, 4, 'Hi Sarah, thanks for helping me with the filter', 'text', NOW() - INTERVAL '10 minutes'),
-(4, 2, 'Happy to help! Let me show you exactly where the filter is located', 'text', NOW() - INTERVAL '9 minutes'),
-(4, 2, 'Can you see my screen now?', 'text', NOW() - INTERVAL '8 minutes'),
-(4, 4, 'Yes, I see it! That makes sense', 'text', NOW() - INTERVAL '7 minutes');
-
--- Insert Files (Shared Documents)
-INSERT INTO files (session_id, user_id, file_name, file_type, file_size, file_path, created_at) VALUES
-(1, 1, 'AC-Troubleshooting-Guide.pdf', 'application/pdf', 2048000, 'files/session_1_ac_guide.pdf', NOW() - INTERVAL '2 days'),
-(2, 2, 'Warranty-Claim-Form.pdf', 'application/pdf', 512000, 'files/session_2_warranty_form.pdf', NOW() - INTERVAL '1 day'),
-(3, 1, 'Thermostat-Setup-Manual.pdf', 'application/pdf', 1024000, 'files/session_3_thermostat_manual.pdf', NOW() - INTERVAL '12 hours'),
-(4, 2, 'Filter-Replacement-Guide.pdf', 'application/pdf', 768000, 'files/session_4_filter_guide.pdf', NOW() - INTERVAL '10 minutes');
-
--- Insert Recordings
-INSERT INTO recordings (session_id, file_path, duration_seconds, file_size, status, created_at, completed_at) VALUES
-(1, 'recordings/session_1_recording.mp4', 2700, 45000000, 'completed', NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days' + INTERVAL '5 minutes'),
-(2, 'recordings/session_2_recording.mp4', 1800, 28000000, 'completed', NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day' + INTERVAL '3 minutes'),
-(3, 'recordings/session_3_recording.mp4', 1200, 18000000, 'completed', NOW() - INTERVAL '12 hours', NOW() - INTERVAL '12 hours' + INTERVAL '2 minutes');
-
--- Insert Session Notes
-INSERT INTO session_notes (session_id, agent_id, content, is_private, created_at, updated_at) VALUES
-(1, 1, 'Customer was very cooperative. Issue was simple circuit breaker reset. Provided troubleshooting guide for future reference.', true, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
-(2, 2, 'Warranty claim processed successfully. Customer had all necessary documentation. Claim number: WC-2024-001.', true, NOW() - INTERVAL '1 day', NOW() - INTERVAL '1 day'),
-(3, 1, 'Remote configuration performed successfully. Updated thermostat firmware from v1.2 to v1.5. Testing completed without issues.', true, NOW() - INTERVAL '12 hours', NOW() - INTERVAL '12 hours'),
-(4, 2, 'Ongoing session - Customer learning filter replacement. Very engaged, asking detailed questions about maintenance.', true, NOW() - INTERVAL '10 minutes', NOW() - INTERVAL '10 minutes');
-
--- Insert Session Tags
-INSERT INTO session_tags (session_id, tag_name, created_at) VALUES
-(1, 'Installation', NOW() - INTERVAL '2 days'),
-(1, 'Troubleshooting', NOW() - INTERVAL '2 days'),
-(2, 'Warranty', NOW() - INTERVAL '1 day'),
-(2, 'Support', NOW() - INTERVAL '1 day'),
-(3, 'Repair', NOW() - INTERVAL '12 hours'),
-(3, 'Remote', NOW() - INTERVAL '12 hours'),
-(4, 'Installation', NOW() - INTERVAL '10 minutes'),
-(4, 'Maintenance', NOW() - INTERVAL '10 minutes');
-
--- Insert Invite Tokens
-INSERT INTO invite_tokens (session_id, token, expires_at, created_at) VALUES
-(4, 'demo_invite_token_' || random()::text || 'activeSession', NOW() + INTERVAL '1 hour', NOW());
-
--- Insert Audit Logs
-INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, created_at) VALUES
-(1, 'session_created', 'session', 1, 'Session created for customer John Doe', NOW() - INTERVAL '2 days'),
-(1, 'session_completed', 'session', 1, 'Session completed after 45 minutes', NOW() - INTERVAL '2 days' + INTERVAL '45 minutes'),
-(2, 'session_created', 'session', 2, 'Session created for customer Emma Davis', NOW() - INTERVAL '1 day'),
-(2, 'session_completed', 'session', 2, 'Session completed after 30 minutes', NOW() - INTERVAL '1 day' + INTERVAL '30 minutes'),
-(1, 'session_created', 'session', 3, 'Session created for customer Robert Brown', NOW() - INTERVAL '12 hours'),
-(1, 'session_completed', 'session', 3, 'Session completed after 20 minutes', NOW() - INTERVAL '12 hours' + INTERVAL '20 minutes'),
-(2, 'session_created', 'session', 4, 'Session created for customer John Doe', NOW() - INTERVAL '15 minutes'),
-(7, 'admin_dashboard_accessed', 'admin', 0, 'Admin viewed dashboard', NOW() - INTERVAL '1 hour');
-
--- Insert Analytics Events
-INSERT INTO analytics_events (session_id, event_name, event_data, created_at) VALUES
-(1, 'call_started', '{"duration": 2700, "participants": 2, "video_quality": "high"}', NOW() - INTERVAL '2 days'),
-(1, 'call_ended', '{"duration": 2700, "resolution": "solved"}', NOW() - INTERVAL '2 days' + INTERVAL '45 minutes'),
-(2, 'call_started', '{"duration": 1800, "participants": 2, "video_quality": "high"}', NOW() - INTERVAL '1 day'),
-(2, 'call_ended', '{"duration": 1800, "resolution": "solved"}', NOW() - INTERVAL '1 day' + INTERVAL '30 minutes'),
-(3, 'call_started', '{"duration": 1200, "participants": 2, "video_quality": "high"}', NOW() - INTERVAL '12 hours'),
-(3, 'call_ended', '{"duration": 1200, "resolution": "solved"}', NOW() - INTERVAL '12 hours' + INTERVAL '20 minutes'),
-(4, 'call_started', '{"duration": 900, "participants": 2, "video_quality": "high"}', NOW() - INTERVAL '15 minutes');
-
--- Insert System Metrics
-INSERT INTO system_metrics (metric_name, metric_value, metric_unit, created_at) VALUES
-('active_sessions', '1', 'count', NOW()),
-('total_sessions_today', '4', 'count', NOW()),
-('total_users_online', '3', 'count', NOW()),
-('average_session_duration', '1675', 'seconds', NOW()),
-('platform_uptime', '99.9', 'percentage', NOW()),
-('recording_queue_size', '0', 'count', NOW());
-
--- Display seed data summary
-SELECT 'Seed Data Loaded Successfully!' as message;
-SELECT COUNT(*) as total_users FROM users;
-SELECT COUNT(*) as total_sessions FROM sessions;
-SELECT COUNT(*) as total_messages FROM messages;
-SELECT COUNT(*) as total_files FROM files;
-SELECT COUNT(*) as total_recordings FROM recordings;
+SELECT 'AtomAssist demo seed data loaded' AS message;
+SELECT email, role FROM users ORDER BY role;
+SELECT token, expires_at FROM invite_tokens;
