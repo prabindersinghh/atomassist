@@ -1,13 +1,4 @@
 {
-  "experimentalServices": {
-    "frontend": {
-      "root": "frontend",
-      "routePrefix": "/",
-      "framework": "vite"
-    },
-    "backend": {
-      "root": "backend",
-      "routePrefix": "/_/backend"
-    }
-  }
+  "version": 2,
+  "ignoreCommand": "echo 'monorepo root - deploy backend/ and frontend/ as separate projects'"
 }
