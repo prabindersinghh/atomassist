@@ -143,10 +143,12 @@ io.on('connection', (socket) => {
 // Error handling
 app.use(errorHandler);
 
-// Start server
-httpServer.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-});
+// Start server (skipped in Vercel serverless environment)
+if (!process.env.VERCEL) {
+  httpServer.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+}
 
 export default app;

@@ -11,3 +11,7 @@ build/
 .vscode/settings.json
 .idea/
 *.iml
+
+# Vercel env upload files (contain secrets, keep local only)
+VERCEL_BACKEND.env
+VERCEL_FRONTEND.env
