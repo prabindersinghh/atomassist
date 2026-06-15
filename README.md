@@ -1,4 +1,6 @@
-![AtomAssist banner](docs/assets/atomassist-banner.png)
+<p align="center">
+  <img src="banner.png" alt="Atomberg AtomAssist" width="100%" />
+</p>
 
 # AtomAssist
 
